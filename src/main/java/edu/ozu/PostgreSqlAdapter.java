@@ -28,6 +28,7 @@ public class PostgreSqlAdapter {
 
     public int insertQuestion(String question, String answer) {
         question = question.replace("'", "''");
+        answer = answer.replace("'", "''");
         ResultSet insertQuestionResult = executeQuery("INSERT INTO fqa.questions(question,answer) VALUES ('" + question + "','" + answer + "') RETURNING id;");
         try {
             if (insertQuestionResult != null) {
@@ -82,7 +83,7 @@ public class PostgreSqlAdapter {
         return checkResult == 1;
     }
 
-    public void getMostSimilarQuestion(ArrayList<String> word_roots) {
+    public String getMostSimilarQuestion(ArrayList<String> word_roots) {
         StringBuilder rootCauseString = new StringBuilder();
         for (int i = 0; i < word_roots.size(); i++) {
             rootCauseString.append("'");
@@ -92,16 +93,19 @@ public class PostgreSqlAdapter {
                 rootCauseString.append(",");
             }
         }
-        String query = "SELECT question_word.question_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.question_word ON words.id = question_word.word_id WHERE words.root IN (" + rootCauseString + ") GROUP BY question_word.question_id ORDER BY word_count DESC;";
-        System.out.println(query);
+        String query = "SELECT most_similar.word_count, questions.* FROM (SELECT question_word.question_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.question_word ON words.id = question_word.word_id WHERE words.root IN (" + rootCauseString + ") GROUP BY question_word.question_id ORDER BY word_count DESC) as most_similar LEFT JOIN fqa.questions ON most_similar.question_id = questions.id ORDER BY word_count DESC LIMIT 1;";
         ResultSet getMostSimilarQuestionResult = executeQuery(query);
+
         try {
-            System.out.println(getMostSimilarQuestionResult.getInt(1));
-            System.out.println(getMostSimilarQuestionResult.getInt(2));
+            if (getMostSimilarQuestionResult != null) {
+                return getMostSimilarQuestionResult.getString("answer");
+            } else {
+                return "not found";
+            }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        //TODO: return answer
+        return null;
     }
 
     public ResultSet executeQuery(String query) {

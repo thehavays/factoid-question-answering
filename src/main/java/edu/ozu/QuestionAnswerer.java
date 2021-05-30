@@ -20,13 +20,13 @@ public class QuestionAnswerer {
                 MorphologicalQuestion morphologicalQuestion = new MorphologicalQuestion(questionAnswer.getQuestion(), Util.getQuestionAnalysis(questionAnswer.getQuestion()));
                 ArrayList<String> wordRoots = new ArrayList<>();
                 ArrayList<String> wordSuffixes = new ArrayList<>();
-                for(String word : morphologicalQuestion.getAnalyses()){
+                for (String word : morphologicalQuestion.getAnalyses()) {
                     wordRoots.add(word.substring(0, word.indexOf("+")));
                     wordSuffixes.add(word.substring(word.indexOf("+") + 1));
-                    adapter.getMostSimilarQuestion(wordRoots);
                 }
-                System.out.println(wordRoots);
-                System.out.println(wordSuffixes);
+                System.out.println("Question = " + questionAnswer.getQuestion());
+                System.out.println("Actual answer = " + questionAnswer.getAnswers().get(0).getText());
+                System.out.println("System answer = " + adapter.getMostSimilarQuestion(wordRoots));
             }
         }
     }
