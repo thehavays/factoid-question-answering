@@ -1,13 +1,13 @@
 package edu.ozu;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
 /**
- * Unit test for simple App.
+ * Unit test for simple JsonFetcher.
  */
-public class AppTest 
+public class JsonFetcherTest
 {
     /**
      * Rigorous Test :-)

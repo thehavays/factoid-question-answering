@@ -4,6 +4,10 @@ import Corpus.Sentence;
 import MorphologicalAnalysis.FsmMorphologicalAnalyzer;
 import MorphologicalAnalysis.FsmParse;
 import MorphologicalAnalysis.FsmParseList;
+import com.google.gson.Gson;
+import edu.ozu.model.Title;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -20,9 +24,9 @@ public class Util {
     public static String readFileFromResources(boolean isTrain) {
         URL resource;
         if (isTrain) {
-            resource = App.class.getClassLoader().getResource(TRAIN_JSON_FILE);
+            resource = JsonFetcher.class.getClassLoader().getResource(TRAIN_JSON_FILE);
         } else {
-            resource = App.class.getClassLoader().getResource(DEV_JSON_FILE);
+            resource = JsonFetcher.class.getClassLoader().getResource(DEV_JSON_FILE);
         }
         byte[] bytes = new byte[0];
         try {
@@ -46,5 +50,15 @@ public class Util {
             }
         }
         return transitionList;
+    }
+
+    public static ArrayList<Title> getData(boolean isTrain) {
+        JSONObject devData = new JSONObject(Util.readFileFromResources(isTrain));
+        JSONArray data = new JSONArray(devData.get("data").toString());
+        ArrayList<Title> titles = new ArrayList<>();
+        for (Object title : data) {
+            titles.add(new Gson().fromJson(String.valueOf(title), Title.class));
+        }
+        return titles;
     }
 }
