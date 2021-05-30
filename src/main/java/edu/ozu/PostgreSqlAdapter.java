@@ -26,9 +26,9 @@ public class PostgreSqlAdapter {
         return con;
     }
 
-    public int insertQuestion(String question) {
+    public int insertQuestion(String question, String answer) {
         question = question.replace("'", "''");
-        ResultSet insertQuestionResult = executeQuery("INSERT INTO fqa.questions(questions) VALUES ('" + question + "') RETURNING id;");
+        ResultSet insertQuestionResult = executeQuery("INSERT INTO fqa.questions(question,answer) VALUES ('" + question + "','" + answer + "') RETURNING id;");
         try {
             if (insertQuestionResult != null) {
                 return insertQuestionResult.getInt("id");
@@ -82,7 +82,7 @@ public class PostgreSqlAdapter {
         return checkResult == 1;
     }
 
-    public int getMostSimilarQuestion(ArrayList<String> word_roots) {
+    public void getMostSimilarQuestion(ArrayList<String> word_roots) {
         StringBuilder rootCauseString = new StringBuilder();
         for (int i = 0; i < word_roots.size(); i++) {
             rootCauseString.append("'");
@@ -101,7 +101,7 @@ public class PostgreSqlAdapter {
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
-        return 0;
+        //TODO: return answer
     }
 
     public ResultSet executeQuery(String query) {

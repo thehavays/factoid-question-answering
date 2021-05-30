@@ -1,6 +1,7 @@
 package edu.ozu;
 
 import edu.ozu.model.MorphologicalQuestion;
+import edu.ozu.model.QuestionAnswer;
 import edu.ozu.model.Title;
 
 import java.util.ArrayList;
@@ -8,15 +9,15 @@ import java.util.ArrayList;
 /**
  * Hello world!
  */
-public class QuestionAnswer {
+public class QuestionAnswerer {
 
 
     public static void main(String[] args) {
         ArrayList<Title> titles = Util.getData(false);
         PostgreSqlAdapter adapter = new PostgreSqlAdapter();
         for (Title title : titles) {
-            for (String question : title.getQuestion()) {
-                MorphologicalQuestion morphologicalQuestion = new MorphologicalQuestion(question, Util.getQuestionAnalysis(question));
+            for (QuestionAnswer questionAnswer : title.getQuestionAnswers()) {
+                MorphologicalQuestion morphologicalQuestion = new MorphologicalQuestion(questionAnswer.getQuestion(), Util.getQuestionAnalysis(questionAnswer.getQuestion()));
                 ArrayList<String> wordRoots = new ArrayList<>();
                 ArrayList<String> wordSuffixes = new ArrayList<>();
                 for(String word : morphologicalQuestion.getAnalyses()){

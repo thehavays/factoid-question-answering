@@ -9,13 +9,11 @@ public class Title {
     private String title;
     private ArrayList<Paragraph> paragraphs;
 
-    public ArrayList<String> getQuestion() {
-        ArrayList<String> questions = new ArrayList<>();
+    public ArrayList<QuestionAnswer> getQuestionAnswers() {
+        ArrayList<QuestionAnswer> questionAnswers = new ArrayList<>();
         for (Paragraph paragraph : paragraphs) {
-            for (QuestionAnswer questionAnswer : paragraph.getQas()) {
-                questions.add(questionAnswer.getQuestion());
-            }
+            questionAnswers.addAll(paragraph.getQas());
         }
-        return questions;
+        return questionAnswers;
     }
 }
