@@ -16,6 +16,7 @@ public class QuestionAnswerer {
     public static void main(String[] args) {
         int totalCountRoot = 0, trueCountRoot = 0, falseCountRoot = 0;
         int totalCountSuffix = 0, trueCountSuffix = 0, falseCountSuffix = 0;
+        int totalCountRootSuffix = 0, trueCountRootSuffix = 0, falseCountRootSuffix = 0;
         ArrayList<Title> titles = Util.getData(true);
         PostgreSqlAdapter adapter = new PostgreSqlAdapter();
         for (Title title : titles) {
@@ -30,7 +31,8 @@ public class QuestionAnswerer {
                         wordSuffixes.add(word.substring(word.indexOf("+") + 1));
                     }
                     String estimatedContextByRoot = adapter.getMostSimilarContextByRoot(wordRoots);
-                    String estimatedContextByRootAndSuffix = adapter.getMostSimilarContextRootAndSuffix(wordRoots, wordSuffixes);
+                    String estimatedContextBySuffix = adapter.getMostSimilarContextRootAndSuffix(wordRoots, wordSuffixes);
+                    String estimatedContextByRootAndSuffix = adapter.getMostSimilarContextRootSuffixPair(wordRoots, wordSuffixes);
                     if (estimatedContextByRoot != null) {
                         totalCountRoot++;
                         if (actualContext.equals(estimatedContextByRoot)) {
@@ -39,18 +41,25 @@ public class QuestionAnswerer {
                             falseCountRoot++;
                         }
                     }
-                    if (estimatedContextByRootAndSuffix != null) {
+                    if (estimatedContextBySuffix != null) {
                         totalCountSuffix++;
-                        if (actualContext.equals(estimatedContextByRoot)) {
+                        if (actualContext.equals(estimatedContextBySuffix)) {
                             trueCountSuffix++;
                         } else {
                             falseCountSuffix++;
                         }
                     }
+                    if (estimatedContextByRootAndSuffix != null) {
+                        totalCountRootSuffix++;
+                        if (actualContext.equals(estimatedContextByRootAndSuffix)) {
+                            trueCountRootSuffix++;
+                        } else {
+                            falseCountRootSuffix++;
+                        }
+                    }
+                    System.out.println("Accuracy root" + (float) (trueCountRoot) / totalCountRoot + "\tAccuracy suffix" + (float) (trueCountSuffix) / totalCountSuffix + "\tAccuracy root and suffix" + (float) (trueCountRootSuffix) / totalCountRootSuffix);
                 }
             }
-
-            System.out.println("Error root" + (float) (falseCountRoot) / totalCountRoot + "Error suffix" + (float) (falseCountSuffix) / totalCountSuffix);
         }
 
         System.out.println("True Count By Root = " + trueCountRoot);
@@ -59,10 +68,16 @@ public class QuestionAnswerer {
         System.out.println("Accuracy Rate By Root = " + (float) (trueCountRoot) / totalCountRoot);
         System.out.println("Error Rate By Root = " + (float) (falseCountRoot) / totalCountRoot);
 
-        System.out.println("True Count By Root and Suffix = " + trueCountSuffix);
-        System.out.println("False Count By Root and Suffix = " + falseCountSuffix);
-        System.out.println("Total Count By Root and Suffix = " + totalCountSuffix);
-        System.out.println("Accuracy Rate By Root and Suffix = " + (float) (trueCountSuffix) / totalCountSuffix);
-        System.out.println("Error Rate By Root and Suffix = " + (float) (falseCountSuffix) / totalCountSuffix);
+        System.out.println("True Count By Suffix = " + trueCountSuffix);
+        System.out.println("False Count By Suffix = " + falseCountSuffix);
+        System.out.println("Total Count By Suffix = " + totalCountSuffix);
+        System.out.println("Accuracy Rate By Suffix = " + (float) (trueCountSuffix) / totalCountSuffix);
+        System.out.println("Error Rate By Suffix = " + (float) (falseCountSuffix) / totalCountSuffix);
+
+        System.out.println("True Count By Root and Suffix = " + trueCountRootSuffix);
+        System.out.println("False Count By Root and Suffix = " + falseCountRootSuffix);
+        System.out.println("Total Count By Root and Suffix = " + totalCountRootSuffix);
+        System.out.println("Accuracy Rate By Root and Suffix = " + (float) (trueCountRootSuffix) / totalCountRootSuffix);
+        System.out.println("Error Rate By Root and Suffix = " + (float) (falseCountRootSuffix) / totalCountRootSuffix);
     }
 }

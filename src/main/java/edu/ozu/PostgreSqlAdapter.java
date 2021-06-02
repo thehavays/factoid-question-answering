@@ -129,6 +129,7 @@ public class PostgreSqlAdapter {
             }
         }
         String query = "SELECT most_similar.word_count, context.* FROM (SELECT context_word.context_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.context_word ON words.id = context_word.word_id WHERE words.root IN (" + rootCauseString + ") GROUP BY context_word.context_id ORDER BY word_count DESC) as most_similar LEFT JOIN fqa.context ON most_similar.context_id = context.id ORDER BY word_count DESC LIMIT 1;";
+        System.out.println( "getMostSimilarContextRoot" + query);
         ResultSet getMostSimilarContextRoot = executeQuery(query);
 
         try {
@@ -163,6 +164,36 @@ public class PostgreSqlAdapter {
             }
         }
         String query = "SELECT most_similar.word_count, context.* FROM (SELECT context_word.context_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.context_word ON words.id = context_word.word_id WHERE words.root IN (" + rootCauseString + ")  AND words.suffix IN (" + suffixCauseString + ") GROUP BY context_word.context_id ORDER BY word_count DESC) as most_similar LEFT JOIN fqa.context ON most_similar.context_id = context.id ORDER BY word_count DESC LIMIT 1;";
+        System.out.println( "getMostSimilarContextRootAndSuffix" + query);
+        ResultSet getMostSimilarContextRootAndSuffix = executeQuery(query);
+
+        try {
+            if (getMostSimilarContextRootAndSuffix != null) {
+                return getMostSimilarContextRootAndSuffix.getString("context");
+            } else {
+                return "not found";
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getMostSimilarContextRootSuffixPair(ArrayList<String> wordRoots, ArrayList<String> wordSuffixes) {
+        int wordSize = wordRoots.size();
+        StringBuilder whereCauseString = new StringBuilder();
+        for (int i = 0; i < wordSize; i++) {
+            whereCauseString.append("(words.root = '");
+            whereCauseString.append(wordRoots.get(i));
+            whereCauseString.append("' AND words.suffix = '");
+            whereCauseString.append(wordSuffixes.get(i));
+            whereCauseString.append("')");
+            if (i != wordRoots.size() - 1) {
+                whereCauseString.append(" OR ");
+            }
+        }
+        String query = "SELECT most_similar.word_count, context.* FROM (SELECT context_word.context_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.context_word ON words.id = context_word.word_id WHERE " + whereCauseString + " GROUP BY context_word.context_id ORDER BY word_count DESC) as most_similar LEFT JOIN fqa.context ON most_similar.context_id = context.id ORDER BY word_count DESC LIMIT 1;";
+        System.out.println( "getMostSimilarContextRootSuffixPair" + query);
         ResultSet getMostSimilarContextRootAndSuffix = executeQuery(query);
 
         try {
