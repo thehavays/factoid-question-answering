@@ -38,10 +38,10 @@ public class Util {
         return new String(bytes);
     }
 
-    public static ArrayList<String> getQuestionAnalysis(String question) {
+    public static ArrayList<String> getContentAnalysis(String content) {
         ArrayList<String> transitionList = new ArrayList<>();
         FsmMorphologicalAnalyzer fsm = new FsmMorphologicalAnalyzer();
-        Sentence sentence = new Sentence(question);
+        Sentence sentence = new Sentence(content);
         FsmParseList[] parseLists = fsm.morphologicalAnalysis(sentence);
         for (FsmParseList parseList : parseLists) {
             for (int j = 0; j < parseList.size(); j++) {

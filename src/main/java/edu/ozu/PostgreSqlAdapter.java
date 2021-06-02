@@ -26,6 +26,21 @@ public class PostgreSqlAdapter {
         return con;
     }
 
+    public int insertContext(String context) {
+        context = context.replace("'", "''");
+        ResultSet insertContextResult = executeQuery("INSERT INTO fqa.context(context) VALUES ('" + context + "') RETURNING id;");
+        try {
+            if (insertContextResult != null) {
+                return insertContextResult.getInt("id");
+            } else {
+                return -1;
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return -1;
+    }
+
     public int insertQuestion(String question, String answer) {
         question = question.replace("'", "''");
         answer = answer.replace("'", "''");
@@ -73,14 +88,93 @@ public class PostgreSqlAdapter {
         return id;
     }
 
+    public boolean isExistContextQuestion(int contextId, int questionId) {
+        ResultSet checkResult = executeQuery("SELECT * FROM fqa.context_question WHERE context_id = " + contextId + " AND question_id = " + questionId + ";");
+        return checkResult != null;
+    }
+
+    public boolean isExistContextWord(int contextId, int wordId) {
+        ResultSet checkResult = executeQuery("SELECT * FROM fqa.context_word WHERE context_id = " + contextId + " AND word_id = " + wordId + ";");
+        return checkResult != null;
+    }
+
     public boolean isExistQuestionWord(int questionId, int wordId) {
         ResultSet checkResult = executeQuery("SELECT * FROM fqa.question_word WHERE question_id = " + questionId + " AND word_id = " + wordId + ";");
         return checkResult != null;
     }
 
+    public boolean insertContextQuestion(int contextId, int questionId) {
+        int checkResult = executeUpdate("INSERT INTO fqa.context_question(context_id, question_id) VALUES (" + contextId + "," + questionId + ");");
+        return checkResult == 1;
+    }
+
+    public boolean insertContextWord(int contextId, int wordId) {
+        int checkResult = executeUpdate("INSERT INTO fqa.context_word(context_id, word_id) VALUES (" + contextId + "," + wordId + ");");
+        return checkResult == 1;
+    }
+
     public boolean insertQuestionWord(int questionId, int wordId) {
         int checkResult = executeUpdate("INSERT INTO fqa.question_word(question_id, word_id) VALUES (" + questionId + "," + wordId + ");");
         return checkResult == 1;
+    }
+
+    public String getMostSimilarContextByRoot(ArrayList<String> wordRoots) {
+        StringBuilder rootCauseString = new StringBuilder();
+        for (int i = 0; i < wordRoots.size(); i++) {
+            rootCauseString.append("'");
+            rootCauseString.append(wordRoots.get(i));
+            rootCauseString.append("'");
+            if (i != wordRoots.size() - 1) {
+                rootCauseString.append(",");
+            }
+        }
+        String query = "SELECT most_similar.word_count, context.* FROM (SELECT context_word.context_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.context_word ON words.id = context_word.word_id WHERE words.root IN (" + rootCauseString + ") GROUP BY context_word.context_id ORDER BY word_count DESC) as most_similar LEFT JOIN fqa.context ON most_similar.context_id = context.id ORDER BY word_count DESC LIMIT 1;";
+        ResultSet getMostSimilarContextRoot = executeQuery(query);
+
+        try {
+            if (getMostSimilarContextRoot != null) {
+                return getMostSimilarContextRoot.getString("context");
+            } else {
+                return "not found";
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    }
+
+    public String getMostSimilarContextRootAndSuffix(ArrayList<String> wordRoots, ArrayList<String> wordSuffixes) {
+        StringBuilder rootCauseString = new StringBuilder();
+        StringBuilder suffixCauseString = new StringBuilder();
+        for (int i = 0; i < wordRoots.size(); i++) {
+            rootCauseString.append("'");
+            rootCauseString.append(wordRoots.get(i));
+            rootCauseString.append("'");
+            if (i != wordRoots.size() - 1) {
+                rootCauseString.append(",");
+            }
+        }
+        for (int i = 0; i < wordSuffixes.size(); i++) {
+            suffixCauseString.append("'");
+            suffixCauseString.append(wordSuffixes.get(i));
+            suffixCauseString.append("'");
+            if (i != wordSuffixes.size() - 1) {
+                suffixCauseString.append(",");
+            }
+        }
+        String query = "SELECT most_similar.word_count, context.* FROM (SELECT context_word.context_id, COUNT(DISTINCT words.root) AS word_count FROM fqa.words LEFT JOIN fqa.context_word ON words.id = context_word.word_id WHERE words.root IN (" + rootCauseString + ")  AND words.suffix IN (" + suffixCauseString + ") GROUP BY context_word.context_id ORDER BY word_count DESC) as most_similar LEFT JOIN fqa.context ON most_similar.context_id = context.id ORDER BY word_count DESC LIMIT 1;";
+        ResultSet getMostSimilarContextRootAndSuffix = executeQuery(query);
+
+        try {
+            if (getMostSimilarContextRootAndSuffix != null) {
+                return getMostSimilarContextRootAndSuffix.getString("context");
+            } else {
+                return "not found";
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
     }
 
     public String getMostSimilarQuestion(ArrayList<String> word_roots) {
